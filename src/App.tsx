@@ -1,11 +1,9 @@
-import './App.css'
+import { HealthDashboardPage } from './pages/HealthDashboardPage'
 
 function App() {
-
-
   return (
    <>
-   <h1>Project Started</h1>
+  <HealthDashboardPage />
    </>
   )
 }
