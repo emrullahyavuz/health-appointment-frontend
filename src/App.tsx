@@ -1,9 +1,10 @@
-import { HealthDashboardPage } from './pages/HealthDashboardPage'
+import DoctorsPage from './pages/DoctorsPage'
+// import { HealthDashboardPage } from './pages/HealthDashboardPage'
 
 function App() {
   return (
    <>
-  <HealthDashboardPage />
+  <DoctorsPage />
    </>
   )
 }
