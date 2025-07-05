@@ -1,5 +1,5 @@
 import type React from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -10,11 +10,13 @@ import { Input } from "../ui/Input"
 import { Label } from "../ui/Label"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react"
 import { loginSchema, type LoginFormData } from "../../schemas/auth.schema"
+import { authAPI } from "../../lib/api"
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const navigate = useNavigate()
 
   const {
     register,
@@ -27,13 +29,35 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true)
     setError("")
-
+    
     try {
-      console.log(data)
-      // API call will go here
-    } catch (err) {
-      console.log(err)
-      setError("Geçersiz email veya şifre")
+      const response = await authAPI.login(data)
+      console.log("Login successful:", response)
+      
+      // Redirect based on user role
+      if (response.user.role === 'doctor') {
+        navigate('/doctors')
+      } else {
+        navigate('/dashboard')
+      }
+    } catch (err: unknown) {
+      console.error("Login error:", err)
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string }, status?: number } }
+        
+        if (axiosError.response?.data?.message) {
+          setError(axiosError.response.data.message)
+        } else if (axiosError.response?.status === 401) {
+          setError("Geçersiz email veya şifre")
+        } else if (axiosError.response?.status === 400) {
+          setError("Email ve şifre gereklidir")
+        } else {
+          setError("Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.")
+        }
+      } else {
+        setError("Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.")
+      }
     } finally {
       setLoading(false)
     }

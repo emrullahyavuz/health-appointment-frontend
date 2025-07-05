@@ -28,7 +28,7 @@ export const registerSchema = yup.object({
     .email('Geçerli bir email adresi giriniz')
     .required('Email adresi gereklidir')
     .trim(),
-  phone: yup
+  telephone: yup
     .string()
     .required('Telefon numarası gereklidir')
     .matches(/^[0-9+\-\s()]+$/, 'Geçerli bir telefon numarası giriniz')

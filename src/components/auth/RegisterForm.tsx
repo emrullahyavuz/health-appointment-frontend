@@ -1,6 +1,6 @@
 import type React from "react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card"
@@ -10,11 +10,13 @@ import { Label } from "../ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/Select"
 import { User, Mail, Lock, Phone, Eye, EyeOff } from "lucide-react"
 import { registerSchema, type RegisterFormData } from "../../schemas/auth.schema"
+import { authAPI } from "../../lib/api"
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const navigate = useNavigate()
 
   const {
     register,
@@ -33,11 +35,31 @@ export function RegisterForm() {
     setError("")
 
     try {
-      console.log(data)
-      // API call will go here
-    } catch (err) {
-      console.log(err)
-      setError("Kayıt işlemi başarısız. Lütfen tekrar deneyin.")
+      const response = await authAPI.register(data)
+      console.log("Registration successful:", response)
+      
+      // Redirect to login page after successful registration
+      navigate('/auth/login', { 
+        state: { message: "Hesabınız başarıyla oluşturuldu. Lütfen giriş yapın." }
+      })
+    } catch (err: unknown) {
+      console.error("Registration error:", err)
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string }, status?: number } }
+        
+        if (axiosError.response?.data?.message) {
+          setError(axiosError.response.data.message)
+        } else if (axiosError.response?.status === 400) {
+          setError("Tüm alanlar gereklidir")
+        } else if (axiosError.response?.status === 409) {
+          setError("Bu email adresi zaten kullanılıyor")
+        } else {
+          setError("Kayıt işlemi başarısız. Lütfen tekrar deneyin.")
+        }
+      } else {
+        setError("Kayıt işlemi başarısız. Lütfen tekrar deneyin.")
+      }
     } finally {
       setLoading(false)
     }
@@ -94,19 +116,19 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefon Numarası</Label>
+              <Label htmlFor="telephone">Telefon Numarası</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
-                  id="phone"
+                  id="telephone"
                   type="tel"
-                  {...register("phone")}
+                  {...register("telephone")}
                   placeholder="Telefon numaranızı giriniz"
-                  className={`pl-10 ${errors.phone ? "border-red-500 focus:border-red-500" : ""}`}
+                  className={`pl-10 ${errors.telephone ? "border-red-500 focus:border-red-500" : ""}`}
                 />
               </div>
-              {errors.phone && (
-                <p className="text-red-500 text-sm">{errors.phone.message}</p>
+              {errors.telephone && (
+                <p className="text-red-500 text-sm">{errors.telephone.message}</p>
               )}
             </div>
 
