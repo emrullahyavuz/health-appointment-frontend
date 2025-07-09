@@ -1,7 +1,13 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import { type AuthState, type LoginPayload, type LoginResponse, type RegisterPayload, type RegisterResponse } from './authTypes';
+import { type AuthState, type LoginPayload, 
+  type LoginResponse, type RegisterPayload, 
+  type RegisterResponse,
+  type PasswordUpdatePayload,
+  type PasswordUpdateResponse,
+ } from './authTypes';
 import { authAPI } from '../../lib/api';
 
+// Register User
 export const registerUser = createAsyncThunk<RegisterResponse, RegisterPayload, { rejectValue: string }>(
   'auth/registerUser',
   async ({  name, email, password, telephone, role }, thunkAPI) => {
@@ -22,7 +28,7 @@ export const registerUser = createAsyncThunk<RegisterResponse, RegisterPayload, 
 );
 
 
-// Async thunk
+// Login User
 export const loginUser = createAsyncThunk<LoginResponse, LoginPayload, { rejectValue: string }>(
   'auth/loginUser',
   async ({ email, password }, thunkAPI) => {
@@ -39,7 +45,23 @@ export const loginUser = createAsyncThunk<LoginResponse, LoginPayload, { rejectV
   }
 );
 
-
+// Password Update
+export const passwordUpdate = createAsyncThunk<PasswordUpdateResponse, PasswordUpdatePayload, { rejectValue: string }>(
+  'auth/passwordUpdate',
+  async ({ oldPassword, newPassword, confirmPassword }, thunkAPI) => {
+    try {
+      const response = await authAPI.updatePassword({
+        oldPassword,
+        newPassword,
+        confirmPassword,
+      });
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Password update failed';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 
 const initialState: AuthState = {
   user: null,
@@ -82,6 +104,14 @@ const authSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Registration failed';
+      })
+      .addCase(passwordUpdate.fulfilled, (state, action: PayloadAction<PasswordUpdateResponse>) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(passwordUpdate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Password update failed';
       });
       
   },

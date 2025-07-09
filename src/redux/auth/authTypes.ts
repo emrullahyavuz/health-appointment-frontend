@@ -36,3 +36,13 @@ export interface RegisterPayload {
 export interface RegisterResponse {
   user: User;
 }
+
+export interface PasswordUpdatePayload {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface PasswordUpdateResponse {
+  message: string;
+}

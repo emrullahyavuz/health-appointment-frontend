@@ -7,7 +7,10 @@ import { Input } from "../ui/Input"
 import { Label } from "../ui/Label"
 import { Lock, Eye, EyeOff, Shield, CheckCircle, AlertCircle } from "lucide-react"
 import { passwordUpdateSchema, type PasswordUpdateFormData } from "../../schemas/auth.schema"
-import { authAPI } from "../../lib/api"
+import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch, RootState } from "../../redux/store"
+import { passwordUpdate } from "../../redux/auth/authSlice"
+import { toast } from "sonner"
 
 export function PasswordUpdateForm() {
   const [showPasswords, setShowPasswords] = useState({
@@ -15,13 +18,16 @@ export function PasswordUpdateForm() {
     new: false,
     confirm: false,
   })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  
   const [success, setSuccess] = useState(false)
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
     feedback: "",
   })
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, loading, error, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   const {
     register,
@@ -76,20 +82,17 @@ export function PasswordUpdateForm() {
   }
 
   const onSubmit = async (data: PasswordUpdateFormData) => {
-    setLoading(true)
-    setError("")
-    setSuccess(false)
-    // TODO: API isteği burada olacak
     
-    const response = await authAPI.updatePassword(data)
-    console.log(response)
-    setTimeout(() => {
+    
+    const response = await dispatch(passwordUpdate(data))
+    if(response.meta.requestStatus === "fulfilled"){
+      toast.success("Şifre başarıyla güncellendi")
       setSuccess(true)
       reset()
       setPasswordStrength({ score: 0, feedback: "" })
-      setLoading(false)
       setTimeout(() => setSuccess(false), 5000)
-    }, 1000)
+    }
+    
   }
 
   const getPasswordStrengthColor = (score: number) => {
