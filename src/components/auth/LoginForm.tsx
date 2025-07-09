@@ -1,67 +1,64 @@
-import type React from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card"
-import { Button } from "../ui/Button"
-import { Input } from "../ui/Input"
-import { Label } from "../ui/Label"
-import { Eye, EyeOff, Mail, Lock } from "lucide-react"
-import { loginSchema, type LoginFormData } from "../../schemas/auth.schema"
-import { authAPI } from "../../lib/api"
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { Label } from "../ui/Label";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { loginSchema, type LoginFormData } from "../../schemas/auth.schema";
+import { authAPI } from "../../lib/api";
+import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../../redux/auth/authSlice";
+import type { AppDispatch, RootState } from "../../redux/store";
 
 export function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const navigate = useNavigate()
-
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, loading, error, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: yupResolver(loginSchema)
-  })
+    resolver: yupResolver(loginSchema),
+  });
 
   const onSubmit = async (data: LoginFormData) => {
-    setLoading(true)
-    setError("")
-    
     try {
-      const response = await authAPI.login(data)
-      console.log("Login successful:", response)
-      
-      // Redirect based on user role
-      if (response.user.role === 'doctor') {
-        navigate('/doctors')
-      } else {
-        navigate('/dashboard')
+      const response = await dispatch(loginUser(data));
+      if (response.meta.requestStatus === "fulfilled") {
+        toast.success("Giriş başarılı");
+        navigate("/dashboard");
       }
+
+      // Redirect based on user role
     } catch (err: unknown) {
-      console.error("Login error:", err)
-      
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: { message?: string }, status?: number } }
-        
-        if (axiosError.response?.data?.message) {
-          setError(axiosError.response.data.message)
-        } else if (axiosError.response?.status === 401) {
-          setError("Geçersiz email veya şifre")
-        } else if (axiosError.response?.status === 400) {
-          setError("Email ve şifre gereklidir")
-        } else {
-          setError("Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.")
-        }
+      console.error("Login error:", err);
+
+      const axiosError = err as {
+        response?: { data?: { message?: string }; status?: number };
+      };
+
+      if (axiosError.response?.data?.message) {
+        setError(axiosError.response.data.message);
+      } else if (axiosError.response?.status === 401) {
+        setError("Geçersiz email veya şifre");
+      } else if (axiosError.response?.status === 400) {
+        setError("Email ve şifre gereklidir");
       } else {
-        setError("Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.")
+        setError("Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.");
       }
     } finally {
-      setLoading(false)
+      // setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -70,13 +67,17 @@ export function LoginForm() {
           <div className="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-4">
             <div className="w-8 h-8 bg-white rounded-sm opacity-80"></div>
           </div>
-          <CardTitle className="text-2xl font-bold">Hesabınıza giriş yapın</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Hesabınıza giriş yapın
+          </CardTitle>
           <p className="text-gray-600">Sağlık panelinize erişin</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">{error}</div>
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                {error}
+              </div>
             )}
 
             <div className="space-y-2">
@@ -88,7 +89,9 @@ export function LoginForm() {
                   type="email"
                   {...register("email")}
                   placeholder="Email adresinizi giriniz"
-                  className={`pl-10 ${errors.email ? "border-red-500 focus:border-red-500" : ""}`}
+                  className={`pl-10 ${
+                    errors.email ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
               </div>
               {errors.email && (
@@ -105,18 +108,26 @@ export function LoginForm() {
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                   placeholder="Şifrenizi giriniz"
-                  className={`pl-10 pr-10 ${errors.password ? "border-red-500 focus:border-red-500" : ""}`}
+                  className={`pl-10 pr-10 ${
+                    errors.password ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm">{errors.password.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -127,7 +138,10 @@ export function LoginForm() {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Hesabınız yok mu?{" "}
-                <Link to="/auth/register" className="text-orange-600 hover:text-orange-500 font-medium">
+                <Link
+                  to="/auth/register"
+                  className="text-orange-600 hover:text-orange-500 font-medium"
+                >
                   Kayıt ol
                 </Link>
               </p>
@@ -136,5 +150,5 @@ export function LoginForm() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

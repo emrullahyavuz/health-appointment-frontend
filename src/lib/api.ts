@@ -99,6 +99,15 @@ export const authAPI = {
     return response.data
   },
 
+  updatePassword: async (credentials: {
+    oldPassword: string
+    newPassword: string
+    confirmPassword: string
+  }) => {
+    const response = await api.post('/auth/update-password', credentials)
+    return response.data
+  },
+
   // Logout user
   logout: async () => {
     try {

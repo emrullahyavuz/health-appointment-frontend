@@ -54,9 +54,31 @@ export const registerSchema = yup.object({
     .oneOf([yup.ref('password')], 'Şifreler eşleşmiyor')
 })
 
+// Password update schema
+export const passwordUpdateSchema = yup.object({
+  oldPassword: yup
+    .string()
+    .required('Mevcut şifre gereklidir'),
+  newPassword: yup
+    .string()
+    .required('Yeni şifre gereklidir')
+    .min(8, 'Yeni şifre en az 8 karakter olmalıdır')
+    .max(50, 'Yeni şifre en fazla 50 karakter olabilir')
+    .notOneOf([yup.ref('currentPassword')], 'Yeni şifre mevcut şifreden farklı olmalıdır')
+    .matches(/[a-z]/, 'En az bir küçük harf içermelidir')
+    .matches(/[A-Z]/, 'En az bir büyük harf içermelidir')
+    .matches(/[0-9]/, 'En az bir rakam içermelidir')
+    .matches(/[^A-Za-z0-9]/, 'En az bir özel karakter içermelidir'),
+  confirmPassword: yup
+    .string()
+    .required('Şifre tekrarı gereklidir')
+    .oneOf([yup.ref('newPassword')], 'Şifreler eşleşmiyor')
+})
+
 // Type definitions for TypeScript
 export type LoginFormData = yup.InferType<typeof loginSchema>
 export type RegisterFormData = yup.InferType<typeof registerSchema>
+export type PasswordUpdateFormData = yup.InferType<typeof passwordUpdateSchema>
 
 // Validation error messages
 export const validationMessages = {
