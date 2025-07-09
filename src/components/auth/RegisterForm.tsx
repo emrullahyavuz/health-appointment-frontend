@@ -1,69 +1,65 @@
-import type React from "react"
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card"
-import { Button } from "../ui/Button"
-import { Input } from "../ui/Input"
-import { Label } from "../ui/Label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/Select"
-import { User, Mail, Lock, Phone, Eye, EyeOff } from "lucide-react"
-import { registerSchema, type RegisterFormData } from "../../schemas/auth.schema"
-import { authAPI } from "../../lib/api"
+import type React from "react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { Label } from "../ui/Label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/Select";
+import { User, Mail, Lock, Phone, Eye, EyeOff } from "lucide-react";
+import {
+  registerSchema,
+  type RegisterFormData,
+} from "../../schemas/auth.schema";
+import { authAPI } from "../../lib/api";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../redux/store";
+import { registerUser } from "../../redux/auth/authSlice";
+import { toast } from "sonner";
+
 
 export function RegisterForm() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, loading, error, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors }
+    formState: { errors },
   } = useForm<RegisterFormData>({
-    resolver: yupResolver(registerSchema)
-  })
+    resolver: yupResolver(registerSchema),
+  });
 
-  const watchedRole = watch("role")
+  const watchedRole = watch("role");
 
   const onSubmit = async (data: RegisterFormData) => {
-    setLoading(true)
-    setError("")
-
     try {
-      const response = await authAPI.register(data)
-      console.log("Registration successful:", response)
+      const response = await dispatch(registerUser(data));
       
-      // Redirect to login page after successful registration
-      navigate('/auth/login', { 
-        state: { message: "Hesabınız başarıyla oluşturuldu. Lütfen giriş yapın." }
-      })
-    } catch (err: unknown) {
-      console.error("Registration error:", err)
-      
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: { message?: string }, status?: number } }
+      if(response.meta.requestStatus === "fulfilled"){
+        toast.success("Hesap oluşturuldu");
+        navigate("/auth/login");
         
-        if (axiosError.response?.data?.message) {
-          setError(axiosError.response.data.message)
-        } else if (axiosError.response?.status === 400) {
-          setError("Tüm alanlar gereklidir")
-        } else if (axiosError.response?.status === 409) {
-          setError("Bu email adresi zaten kullanılıyor")
-        } else {
-          setError("Kayıt işlemi başarısız. Lütfen tekrar deneyin.")
-        }
-      } else {
-        setError("Kayıt işlemi başarısız. Lütfen tekrar deneyin.")
       }
-    } finally {
-      setLoading(false)
-    }
-  }
+      
+    } catch (err: unknown) {
+      toast.error(err as string);
+    } 
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -72,13 +68,17 @@ export function RegisterForm() {
           <div className="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-4">
             <div className="w-8 h-8 bg-white rounded-sm opacity-80"></div>
           </div>
-          <CardTitle className="text-2xl font-bold">Hesabınızı oluşturun</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Hesabınızı oluşturun
+          </CardTitle>
           <p className="text-gray-600">Sağlık yönetim platformumuza katılın</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">{error}</div>
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                {error}
+              </div>
             )}
 
             <div className="space-y-2">
@@ -90,7 +90,9 @@ export function RegisterForm() {
                   type="text"
                   {...register("name")}
                   placeholder="Ad soyadınızı giriniz"
-                  className={`pl-10 ${errors.name ? "border-red-500 focus:border-red-500" : ""}`}
+                  className={`pl-10 ${
+                    errors.name ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
               </div>
               {errors.name && (
@@ -107,7 +109,9 @@ export function RegisterForm() {
                   type="email"
                   {...register("email")}
                   placeholder="Email adresinizi giriniz"
-                  className={`pl-10 ${errors.email ? "border-red-500 focus:border-red-500" : ""}`}
+                  className={`pl-10 ${
+                    errors.email ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
               </div>
               {errors.email && (
@@ -124,11 +128,17 @@ export function RegisterForm() {
                   type="tel"
                   {...register("telephone")}
                   placeholder="Telefon numaranızı giriniz"
-                  className={`pl-10 ${errors.telephone ? "border-red-500 focus:border-red-500" : ""}`}
+                  className={`pl-10 ${
+                    errors.telephone
+                      ? "border-red-500 focus:border-red-500"
+                      : ""
+                  }`}
                 />
               </div>
               {errors.telephone && (
-                <p className="text-red-500 text-sm">{errors.telephone.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.telephone.message}
+                </p>
               )}
             </div>
 
@@ -136,9 +146,15 @@ export function RegisterForm() {
               <Label htmlFor="role">Hesap Türü</Label>
               <Select
                 value={watchedRole}
-                onValueChange={(value: "patient" | "doctor") => setValue("role", value)}
+                onValueChange={(value: "patient" | "doctor") =>
+                  setValue("role", value)
+                }
               >
-                <SelectTrigger className={errors.role ? "border-red-500 focus:border-red-500" : ""}>
+                <SelectTrigger
+                  className={
+                    errors.role ? "border-red-500 focus:border-red-500" : ""
+                  }
+                >
                   <SelectValue placeholder="Hesap türünü seçiniz" />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,18 +176,26 @@ export function RegisterForm() {
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                   placeholder="Şifrenizi giriniz"
-                  className={`pl-10 pr-10 ${errors.password ? "border-red-500 focus:border-red-500" : ""}`}
+                  className={`pl-10 pr-10 ${
+                    errors.password ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm">{errors.password.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -184,11 +208,17 @@ export function RegisterForm() {
                   type="password"
                   {...register("confirmPassword")}
                   placeholder="Şifrenizi tekrar giriniz"
-                  className={`pl-10 ${errors.confirmPassword ? "border-red-500 focus:border-red-500" : ""}`}
+                  className={`pl-10 ${
+                    errors.confirmPassword
+                      ? "border-red-500 focus:border-red-500"
+                      : ""
+                  }`}
                 />
               </div>
               {errors.confirmPassword && (
-                <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
@@ -199,7 +229,10 @@ export function RegisterForm() {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Zaten hesabınız var mı?{" "}
-                <Link to="/auth/login" className="text-orange-600 hover:text-orange-500 font-medium">
+                <Link
+                  to="/auth/login"
+                  className="text-orange-600 hover:text-orange-500 font-medium"
+                >
                   Giriş yap
                 </Link>
               </p>
@@ -208,5 +241,5 @@ export function RegisterForm() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

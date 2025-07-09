@@ -9,11 +9,10 @@ import { Input } from "../ui/Input";
 import { Label } from "../ui/Label";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { loginSchema, type LoginFormData } from "../../schemas/auth.schema";
-import { authAPI } from "../../lib/api";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../redux/auth/authSlice";
 import type { AppDispatch, RootState } from "../../redux/store";
+import { loginUser } from "../../redux/auth/authSlice";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,23 +39,7 @@ export function LoginForm() {
 
       // Redirect based on user role
     } catch (err: unknown) {
-      console.error("Login error:", err);
-
-      const axiosError = err as {
-        response?: { data?: { message?: string }; status?: number };
-      };
-
-      if (axiosError.response?.data?.message) {
-        setError(axiosError.response.data.message);
-      } else if (axiosError.response?.status === 401) {
-        setError("Geçersiz email veya şifre");
-      } else if (axiosError.response?.status === 400) {
-        setError("Email ve şifre gereklidir");
-      } else {
-        setError("Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.");
-      }
-    } finally {
-      // setLoading(false);
+      toast.error(err as string);
     }
   };
 

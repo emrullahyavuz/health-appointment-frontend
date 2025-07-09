@@ -66,7 +66,7 @@ type RegisterFormData = {
   email: string
   telephone: string
   password: string
-  role: 'patient' | 'doctor'
+  role: 'patient' | 'doctor' | 'admin'
 }
 
 // Auth API endpoints
