@@ -1,4 +1,4 @@
-import Doctors from "../components/Doctors"
+import { Doctors } from "../components/Doctors"
 
 export const DoctorsPage = () => {
   return (

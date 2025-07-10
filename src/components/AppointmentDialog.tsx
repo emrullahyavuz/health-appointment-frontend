@@ -1,5 +1,4 @@
 import type React from "react"
-
 import { useState } from "react"
 import { User, CreditCard } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/Dialog"
@@ -10,22 +9,34 @@ import { Textarea } from "./ui/TextArea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/Select"
 import { Badge } from "./ui/Badge"
 import { Separator } from "./ui/Seperator"
+// import { useAuth } from "../lib/auth"
+// import { api } from "../lib/api"
 
 interface Doctor {
-  id: number
-  name: string
+  _id: string
+  user: {
+    name: string
+    email: string
+    phone: string
+    avatar?: string
+  }
   specialty: string
   experience: number
-  rating: number
-  reviews: number
-  location: string
-  image: string
-  availability: string
-  nextSlot: string
-  price: number
-  about: string
   education: string
   languages: string[]
+  workingHours: {
+    day: string
+    startTime: string
+    endTime: string
+    isAvailable: boolean
+  }[]
+  consultationFee: number
+  location: string
+  about: string
+  rating: number
+  reviewCount: number
+  isAvailable: boolean
+  nextAvailableSlot?: string
 }
 
 interface AppointmentDialogProps {
@@ -33,22 +44,6 @@ interface AppointmentDialogProps {
   isOpen: boolean
   onClose: () => void
 }
-
-const timeSlots = [
-  "9:00 AM",
-  "9:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "2:00 PM",
-  "2:30 PM",
-  "3:00 PM",
-  "3:30 PM",
-  "4:00 PM",
-  "4:30 PM",
-  "5:00 PM",
-]
 
 const appointmentTypes = [
   "General Consultation",
@@ -59,37 +54,108 @@ const appointmentTypes = [
 ]
 
 export function AppointmentDialog({ doctor, isOpen, onClose }: AppointmentDialogProps) {
-  const [selectedDate, setSelectedDate] = useState("")
-  const [selectedTime, setSelectedTime] = useState("")
-  const [appointmentType, setAppointmentType] = useState("")
-  const [patientName, setPatientName] = useState("")
-  const [patientPhone, setPatientPhone] = useState("")
-  const [patientEmail, setPatientEmail] = useState("")
-  const [symptoms, setSymptoms] = useState("")
+  const [appointmentData, setAppointmentData] = useState({
+    date: "",
+    time: "",
+    type: "",
+    symptoms: "",
+    notes: "",
+  })
+  const [availableSlots, setAvailableSlots] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState("")
+
+  // const { user, token } = useAuth()
 
   if (!doctor) return null
+
+  const generateTimeSlots = (startTime: string, endTime: string) => {
+    const slots = []
+    const start = new Date(`2000-01-01 ${startTime}`)
+    const end = new Date(`2000-01-01 ${endTime}`)
+
+    while (start < end) {
+      slots.push(
+        start.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }),
+      )
+      start.setMinutes(start.getMinutes() + 30) // 30-minute slots
+    }
+
+    return slots
+  }
+
+  const handleDateChange = (date: string) => {
+    setAppointmentData((prev) => ({ ...prev, date, time: "" }))
+
+    if (date) {
+      const selectedDate = new Date(date)
+      const dayName = selectedDate.toLocaleDateString("en-US", { weekday: "long" })
+
+      const daySchedule = doctor.workingHours.find(
+        (schedule) => schedule.day.toLowerCase() === dayName.toLowerCase() && schedule.isAvailable,
+      )
+
+      if (daySchedule) {
+        const slots = generateTimeSlots(daySchedule.startTime, daySchedule.endTime)
+        setAvailableSlots(slots)
+      } else {
+        setAvailableSlots([])
+      }
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError("")
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    // if (!token) {
+    //   setError("Please login to book an appointment")
+    //   setIsSubmitting(false)
+    //   return
+    // }
 
-    // Reset form and close dialog
-    setSelectedDate("")
-    setSelectedTime("")
-    setAppointmentType("")
-    setPatientName("")
-    setPatientPhone("")
-    setPatientEmail("")
-    setSymptoms("")
-    setIsSubmitting(false)
-    onClose()
+    // try {
+    //   const response = await api.appointments.create(token, {
+    //     doctorId: doctor._id,
+    //     date: appointmentData.date,
+    //     time: appointmentData.time,
+    //     type: appointmentData.type,
+    //     symptoms: appointmentData.symptoms,
+    //     notes: appointmentData.notes,
+    //   })
 
-    // Show success message (you can implement toast notification here)
-    alert("Appointment booked successfully!")
+    //   if (response.ok) {
+    //     const result = await response.json()
+    //     alert("Appointment booked successfully!")
+
+    //     // Reset form and close dialog
+    //     setAppointmentData({
+    //       date: "",
+    //       time: "",
+    //       type: "",
+    //       symptoms: "",
+    //       notes: "",
+    //     })
+    //     setAvailableSlots([])
+    //     onClose()
+    //   } else {
+    //     const errorData = await response.json()
+    //     setError(errorData.message || "Failed to book appointment")
+    //   }
+    // } catch (err) {
+    //   setError("Network error. Please try again.")
+    // } finally {
+    //   setIsSubmitting(false)
+    // }
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setAppointmentData((prev) => ({ ...prev, [field]: value }))
   }
 
   return (
@@ -103,20 +169,26 @@ export function AppointmentDialog({ doctor, isOpen, onClose }: AppointmentDialog
           {/* Doctor Info */}
           <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
             <img
-              src={doctor.image || "/placeholder.svg"}
-              alt={doctor.name}
+              src={doctor.user.avatar || "/placeholder.svg?height=64&width=64"}
+              alt={doctor.user.name}
               className="w-16 h-16 rounded-full object-cover"
             />
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900">{doctor.name}</h3>
+              <h3 className="font-semibold text-gray-900">{doctor.user.name}</h3>
               <p className="text-sm text-gray-600">{doctor.specialty}</p>
               <p className="text-sm text-gray-500">{doctor.location}</p>
               <div className="flex items-center space-x-2 mt-1">
-                <Badge className="bg-green-100 text-green-800">{doctor.availability}</Badge>
-                <span className="text-lg font-bold text-gray-900">${doctor.price}</span>
+                <Badge className="bg-green-100 text-green-800">
+                  {doctor.isAvailable ? "Available" : "Not Available"}
+                </Badge>
+                <span className="text-lg font-bold text-gray-900">${doctor.consultationFee}</span>
               </div>
             </div>
           </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">{error}</div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Date and Time Selection */}
@@ -126,20 +198,33 @@ export function AppointmentDialog({ doctor, isOpen, onClose }: AppointmentDialog
                 <Input
                   id="date"
                   type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  value={appointmentData.date}
+                  onChange={(e) => handleDateChange(e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
                   required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="time">Select Time</Label>
-                <Select value={selectedTime} onValueChange={setSelectedTime} required>
+                <Select
+                  value={appointmentData.time}
+                  onValueChange={(value) => handleInputChange("time", value)}
+                  required
+                  disabled={!appointmentData.date || availableSlots.length === 0}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose time slot" />
+                    <SelectValue
+                      placeholder={
+                        !appointmentData.date
+                          ? "Select date first"
+                          : availableSlots.length === 0
+                            ? "No slots available"
+                            : "Choose time slot"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {timeSlots.map((time) => (
+                    {availableSlots.map((time) => (
                       <SelectItem key={time} value={time}>
                         {time}
                       </SelectItem>
@@ -152,7 +237,7 @@ export function AppointmentDialog({ doctor, isOpen, onClose }: AppointmentDialog
             {/* Appointment Type */}
             <div className="space-y-2">
               <Label htmlFor="type">Appointment Type</Label>
-              <Select value={appointmentType} onValueChange={setAppointmentType} required>
+              <Select value={appointmentData.type} onValueChange={(value) => handleInputChange("type", value)} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select appointment type" />
                 </SelectTrigger>
@@ -177,38 +262,18 @@ export function AppointmentDialog({ doctor, isOpen, onClose }: AppointmentDialog
 
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={patientName}
-                    onChange={(e) => setPatientName(e.target.value)}
-                    placeholder="Enter your full name"
-                    required
-                  />
+                  <Label>Patient Name</Label>
+                  <Input value={user?.name || ""} disabled />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={patientPhone}
-                      onChange={(e) => setPatientPhone(e.target.value)}
-                      placeholder="Your phone number"
-                      required
-                    />
+                    <Label>Phone Number</Label>
+                    <Input value={user?.phone || ""} disabled />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={patientEmail}
-                      onChange={(e) => setPatientEmail(e.target.value)}
-                      placeholder="Your email address"
-                      required
-                    />
+                    <Label>Email Address</Label>
+                    <Input value={user?.email || ""} disabled />
                   </div>
                 </div>
               </div>
@@ -216,13 +281,26 @@ export function AppointmentDialog({ doctor, isOpen, onClose }: AppointmentDialog
 
             {/* Symptoms/Reason */}
             <div className="space-y-2">
-              <Label htmlFor="symptoms">Reason for Visit / Symptoms</Label>
+              <Label htmlFor="symptoms">Symptoms / Reason for Visit</Label>
               <Textarea
                 id="symptoms"
-                value={symptoms}
-                onChange={(e) => setSymptoms(e.target.value)}
+                value={appointmentData.symptoms}
+                onChange={(e) => handleInputChange("symptoms", e.target.value)}
                 placeholder="Please describe your symptoms or reason for the appointment..."
                 rows={4}
+                required
+              />
+            </div>
+
+            {/* Additional Notes */}
+            <div className="space-y-2">
+              <Label htmlFor="notes">Additional Notes (Optional)</Label>
+              <Textarea
+                id="notes"
+                value={appointmentData.notes}
+                onChange={(e) => handleInputChange("notes", e.target.value)}
+                placeholder="Any additional information you'd like to share..."
+                rows={3}
               />
             </div>
 
@@ -238,7 +316,7 @@ export function AppointmentDialog({ doctor, isOpen, onClose }: AppointmentDialog
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <div className="flex justify-between">
                   <span>Consultation Fee</span>
-                  <span>${doctor.price}</span>
+                  <span>${doctor.consultationFee}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Service Fee</span>
@@ -247,7 +325,7 @@ export function AppointmentDialog({ doctor, isOpen, onClose }: AppointmentDialog
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span>Total Amount</span>
-                  <span>${doctor.price + 10}</span>
+                  <span>${doctor.consultationFee + 10}</span>
                 </div>
               </div>
             </div>

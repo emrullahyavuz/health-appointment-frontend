@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Calendar,
   MessageSquare,
@@ -18,137 +18,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Input } from "./ui/Input"
 import { DoctorCard } from "./DoctorCard"
 import { AppointmentDialog } from "./AppointmentDialog"
+import { doctorAPI } from "../lib/api"
 
-const doctors = [
-  {
-    id: 1,
-    name: "Dr. Sarah Johnson",
-    specialty: "Cardiology",
-    experience: 12,
-    rating: 4.9,
-    reviews: 324,
-    location: "Heart Center, Floor 3",
-    image: "/placeholder.svg?height=80&width=80",
-    availability: "Available Today",
-    nextSlot: "2:30 PM",
-    price: 150,
-    about: "Specialized in interventional cardiology with expertise in complex cardiac procedures.",
-    education: "MD from Harvard Medical School",
-    languages: ["English", "Spanish"],
-  },
-  {
-    id: 2,
-    name: "Dr. Michael Chen",
-    specialty: "Neurology",
-    experience: 15,
-    rating: 4.8,
-    reviews: 289,
-    location: "Neurology Wing, Floor 2",
-    image: "/placeholder.svg?height=80&width=80",
-    availability: "Available Tomorrow",
-    nextSlot: "10:00 AM",
-    price: 180,
-    about: "Expert in treating neurological disorders including epilepsy and movement disorders.",
-    education: "MD from Johns Hopkins University",
-    languages: ["English", "Mandarin"],
-  },
-  {
-    id: 3,
-    name: "Dr. Emily Rodriguez",
-    specialty: "Pediatrics",
-    experience: 8,
-    rating: 4.9,
-    reviews: 456,
-    location: "Children's Wing, Floor 1",
-    image: "/placeholder.svg?height=80&width=80",
-    availability: "Available Today",
-    nextSlot: "4:15 PM",
-    price: 120,
-    about: "Dedicated pediatrician with special interest in child development and immunizations.",
-    education: "MD from Stanford University",
-    languages: ["English", "Spanish", "Portuguese"],
-  },
-  {
-    id: 4,
-    name: "Dr. James Wilson",
-    specialty: "Orthopedics",
-    experience: 20,
-    rating: 4.7,
-    reviews: 198,
-    location: "Orthopedic Center, Floor 4",
-    image: "/placeholder.svg?height=80&width=80",
-    availability: "Available Today",
-    nextSlot: "1:45 PM",
-    price: 200,
-    about: "Orthopedic surgeon specializing in sports medicine and joint replacement.",
-    education: "MD from Mayo Clinic",
-    languages: ["English"],
-  },
-  {
-    id: 5,
-    name: "Dr. Lisa Thompson",
-    specialty: "Dermatology",
-    experience: 10,
-    rating: 4.8,
-    reviews: 367,
-    location: "Dermatology Clinic, Floor 2",
-    image: "/placeholder.svg?height=80&width=80",
-    availability: "Available Tomorrow",
-    nextSlot: "11:30 AM",
-    price: 140,
-    about: "Dermatologist with expertise in cosmetic and medical dermatology procedures.",
-    education: "MD from UCLA Medical School",
-    languages: ["English", "French"],
-  },
-  {
-    id: 6,
-    name: "Dr. Robert Kim",
-    specialty: "Gastroenterology",
-    experience: 14,
-    rating: 4.6,
-    reviews: 234,
-    location: "GI Center, Floor 3",
-    image: "/placeholder.svg?height=80&width=80",
-    availability: "Available Today",
-    nextSlot: "3:00 PM",
-    price: 170,
-    about: "Gastroenterologist specializing in inflammatory bowel disease and endoscopy.",
-    education: "MD from University of Pennsylvania",
-    languages: ["English", "Korean"],
-  },
-  {
-    id: 7,
-    name: "Dr. Amanda Davis",
-    specialty: "Psychiatry",
-    experience: 11,
-    rating: 4.9,
-    reviews: 412,
-    location: "Mental Health Center, Floor 5",
-    image: "/placeholder.svg?height=80&width=80",
-    availability: "Available Tomorrow",
-    nextSlot: "9:00 AM",
-    price: 160,
-    about: "Psychiatrist with focus on anxiety disorders, depression, and cognitive behavioral therapy.",
-    education: "MD from Columbia University",
-    languages: ["English", "German"],
-  },
-  {
-    id: 8,
-    name: "Dr. David Martinez",
-    specialty: "Ophthalmology",
-    experience: 16,
-    rating: 4.7,
-    reviews: 298,
-    location: "Eye Center, Floor 1",
-    image: "/placeholder.svg?height=80&width=80",
-    availability: "Available Today",
-    nextSlot: "5:30 PM",
-    price: 130,
-    about: "Ophthalmologist specializing in cataract surgery and retinal diseases.",
-    education: "MD from Duke University",
-    languages: ["English", "Spanish"],
-  },
-]
+interface Doctor {
+  _id: string
+  user: {
+    name: string
+    email: string
+    phone: string
+    avatar?: string
+  }
+  specialty: string
+  experience: number
+  education: string
+  languages: string[]
+  workingHours: {
+    day: string
+    startTime: string
+    endTime: string
+    isAvailable: boolean
+  }[]
+  consultationFee: number
+  location: string
+  about: string
+  rating: number
+  reviewCount: number
+  isAvailable: boolean
+  nextAvailableSlot?: string
+}
 
 const specialties = [
   "All Specialties",
@@ -162,23 +59,94 @@ const specialties = [
   "Ophthalmology",
 ]
 
-export default function Doctors() {
+export function Doctors() {
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties")
-  const [selectedDoctor, setSelectedDoctor] = useState<(typeof doctors)[0] | null>(null)
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
   const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false)
-
-  const filteredDoctors = doctors.filter((doctor) => {
-    const matchesSearch =
-      doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSpecialty = selectedSpecialty === "All Specialties" || doctor.specialty === selectedSpecialty
-    return matchesSearch && matchesSpecialty
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({
+    totalDoctors: 0,
+    patientsServed: 0,
+    averageRating: 0,
+    availableToday: 0,
   })
 
-  const handleBookAppointment = (doctor: (typeof doctors)[0]) => {
+
+  useEffect(() => {
+    fetchDoctors()
+  }, [])
+
+  useEffect(() => {
+    filterDoctors()
+  }, [doctors, searchTerm, selectedSpecialty])
+
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true)
+      const response = await doctorAPI.getDoctors()
+      console.log(response)
+      setDoctors(response.doctors)
+      // setStats({
+      //   totalDoctors: response.data.length,
+      //   patientsServed: 0,
+      //   averageRating: 0,
+      //   availableToday: 0,
+      // })
+    } catch (error) {
+      console.error("Error fetching doctors:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filterDoctors = () => {
+    let filtered = doctors
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (doctor) =>
+          doctor.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
+
+    if (selectedSpecialty !== "All Specialties") {
+      filtered = filtered.filter((doctor) => doctor.specialty === selectedSpecialty)
+    }
+
+    setFilteredDoctors(filtered)
+  }
+
+  const handleBookAppointment = (doctor: Doctor) => {
+    if (!user) {
+      // Redirect to login if not authenticated
+      window.location.href = "/login"
+      return
+    }
+
+    if (user.role !== "patient") {
+      alert("Only patients can book appointments")
+      return
+    }
+
     setSelectedDoctor(doctor)
     setIsAppointmentDialogOpen(true)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading doctors...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -239,7 +207,7 @@ export default function Doctors() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Doctors</p>
-                <p className="text-2xl font-bold text-gray-900">150+</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalDoctors}+</p>
               </div>
             </div>
           </Card>
@@ -250,7 +218,7 @@ export default function Doctors() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Patients Served</p>
-                <p className="text-2xl font-bold text-gray-900">25K+</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.patientsServed}+</p>
               </div>
             </div>
           </Card>
@@ -261,7 +229,7 @@ export default function Doctors() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Average Rating</p>
-                <p className="text-2xl font-bold text-gray-900">4.8</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.averageRating.toFixed(1)}</p>
               </div>
             </div>
           </Card>
@@ -272,7 +240,7 @@ export default function Doctors() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Available Today</p>
-                <p className="text-2xl font-bold text-gray-900">45</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.availableToday}</p>
               </div>
             </div>
           </Card>
@@ -309,11 +277,11 @@ export default function Doctors() {
         {/* Doctors Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDoctors.map((doctor) => (
-            <DoctorCard key={doctor.id} doctor={doctor} onBookAppointment={() => handleBookAppointment(doctor)} />
+            <DoctorCard key={doctor._id} doctor={doctor} onBookAppointment={() => handleBookAppointment(doctor)} />
           ))}
         </div>
 
-        {filteredDoctors.length === 0 && (
+        {filteredDoctors.length === 0 && !loading && (
           <div className="text-center py-12">
             <Stethoscope className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No doctors found</h3>

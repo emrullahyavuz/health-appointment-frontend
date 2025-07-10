@@ -132,6 +132,14 @@ export const authAPI = {
   }
 }
 
+// Doctor API endpoints
+export const doctorAPI = {
+  getDoctors: async () => {
+    const response = await api.get('/doctors')
+    return response.data
+  }
+}
+
 // Utility functions
 export const isAuthenticated = () => {
   return !!localStorage.getItem('accessToken')
