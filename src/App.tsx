@@ -6,6 +6,8 @@ import { RegisterForm } from "./components/auth/RegisterForm";
 import { PasswordUpdateForm } from "./components/auth/PasswordUpdateForm";
 import { ProfileForm } from "./components/auth/ProfileForm";
 import { Toaster } from "sonner";
+import { AppointmentsPage } from "./pages/Appointments";
+import { MessagesPage } from "./pages/Messages";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
           <Route path="/profile/me" element={<ProfileForm />} />
           <Route path="/dashboard" element={<HealthDashboardPage />} />
           <Route path="/doctors" element={<DoctorsPage />} />
+          <Route path="/appointments" element={<AppointmentsPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
         </Routes>
       </BrowserRouter>
     </>

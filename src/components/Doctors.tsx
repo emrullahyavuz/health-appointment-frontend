@@ -19,7 +19,7 @@ import { Input } from "./ui/Input"
 import { DoctorCard } from "./DoctorCard"
 import { AppointmentDialog } from "./AppointmentDialog"
 import { doctorAPI } from "../lib/api"
-import Header from "./header/Header"
+import { Sidebar } from "./header/Sidebar"
 
 interface Doctor {
   _id: string
@@ -153,7 +153,7 @@ export function Doctors() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <Header />
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">

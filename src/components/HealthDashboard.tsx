@@ -19,7 +19,7 @@ import { Button } from "./ui/Button"
 import { Badge } from "./ui/Badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/Select"
 import { Separator } from "./ui/Seperator"
-import Header from "./header/Header"
+import { Sidebar } from "./header/Sidebar"
 
 export function HealthDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("Last Week")
@@ -71,7 +71,7 @@ export function HealthDashboard() {
   return (
     <div className="flex h-screen bg-gray-50 health-dashboard">
       {/* Sidebar */}
-      <Header />
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 flex">
