@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { AppointmentsPage } from "./pages/Appointments";
 import { MessagesPage } from "./pages/Messages";
 import { ReviewsPage } from "./pages/Reviews";
+import { SettingsPage } from "./pages/Settings";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/reviews" element={<ReviewsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </BrowserRouter>
     </>
