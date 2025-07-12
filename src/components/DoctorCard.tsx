@@ -65,12 +65,12 @@ export function DoctorCard({ doctor, onBookAppointment }: DoctorCardProps) {
       <CardContent className="p-6">
         <div className="flex items-start space-x-4 mb-4">
           <img
-            src={doctor.user.avatar || "/placeholder.svg?height=64&width=64"}
-            alt={doctor.user.name}
+            src={doctor.user?.avatar || "/placeholder.svg?height=64&width=64"}
+            alt={doctor.user?.name}
             className="w-16 h-16 rounded-full object-cover"
           />
           <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 mb-1">{doctor.user.name}</h3>
+            <h3 className="font-semibold text-gray-900 mb-1">{doctor.user?.name}</h3>
             <p className="text-sm text-gray-600 mb-2">{doctor.specialty}</p>
             <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-1">

@@ -19,6 +19,7 @@ import { Button } from "./ui/Button"
 import { Badge } from "./ui/Badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/Select"
 import { Separator } from "./ui/Seperator"
+import Header from "./header/Header"
 
 export function HealthDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("Last Week")
@@ -70,33 +71,7 @@ export function HealthDashboard() {
   return (
     <div className="flex h-screen bg-gray-50 health-dashboard">
       {/* Sidebar */}
-      <div className="w-20 bg-white border-r border-gray-200 flex flex-col items-center py-6 space-y-8">
-        <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-          <div className="w-6 h-6 bg-white rounded-sm opacity-80"></div>
-        </div>
-
-        <nav className="flex flex-col space-y-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 bg-gray-900 text-white hover:bg-gray-800 sidebar-nav-item"
-          >
-            <BarChart3 className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 text-gray-400 hover:text-gray-600 sidebar-nav-item">
-            <Calendar className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 text-gray-400 hover:text-gray-600 sidebar-nav-item">
-            <MessageSquare className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 text-gray-400 hover:text-gray-600 sidebar-nav-item">
-            <BarChart3 className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 text-gray-400 hover:text-gray-600 sidebar-nav-item">
-            <Settings className="w-6 h-6" />
-          </Button>
-        </nav>
-      </div>
+      <Header />
 
       {/* Main Content */}
       <div className="flex-1 flex">

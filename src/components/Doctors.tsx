@@ -19,6 +19,7 @@ import { Input } from "./ui/Input"
 import { DoctorCard } from "./DoctorCard"
 import { AppointmentDialog } from "./AppointmentDialog"
 import { doctorAPI } from "../lib/api"
+import Header from "./header/Header"
 
 interface Doctor {
   _id: string
@@ -89,12 +90,12 @@ export function Doctors() {
       const response = await doctorAPI.getDoctors()
       console.log(response)
       setDoctors(response.doctors)
-      // setStats({
-      //   totalDoctors: response.data.length,
-      //   patientsServed: 0,
-      //   averageRating: 0,
-      //   availableToday: 0,
-      // })
+      setStats({
+        totalDoctors: response.pagination.totalDoctors,
+        patientsServed: 0,
+        averageRating: 0,
+        availableToday: 0,
+      })
     } catch (error) {
       console.error("Error fetching doctors:", error)
     } finally {
@@ -152,33 +153,7 @@ export function Doctors() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-20 bg-white border-r border-gray-200 flex flex-col items-center py-6 space-y-8">
-        <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-          <div className="w-6 h-6 bg-white rounded-sm opacity-80"></div>
-        </div>
-
-        <nav className="flex flex-col space-y-6">
-          <Button variant="ghost" size="icon" className="w-12 h-12 text-gray-400 hover:text-gray-600 sidebar-nav-item">
-            <BarChart3 className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 text-gray-400 hover:text-gray-600 sidebar-nav-item">
-            <Calendar className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 text-gray-400 hover:text-gray-600 sidebar-nav-item">
-            <MessageSquare className="w-6 h-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 bg-gray-900 text-white hover:bg-gray-800 sidebar-nav-item"
-          >
-            <Stethoscope className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 text-gray-400 hover:text-gray-600 sidebar-nav-item">
-            <Settings className="w-6 h-6" />
-          </Button>
-        </nav>
-      </div>
+      <Header />
 
       {/* Main Content */}
       <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">

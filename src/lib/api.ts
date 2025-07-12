@@ -140,6 +140,13 @@ export const doctorAPI = {
   }
 }
 
+export const userAPI = {
+  getUserProfile: async () => {
+    const response = await api.get(`/users/profile`)
+    return response.data
+  }
+}
+
 // Utility functions
 export const isAuthenticated = () => {
   return !!localStorage.getItem('accessToken')

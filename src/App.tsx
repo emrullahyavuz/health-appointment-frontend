@@ -20,7 +20,7 @@ function App() {
             path="/auth/password-update"
             element={<PasswordUpdateForm />}
           />
-          <Route path="/auth/profile" element={<ProfileForm />} />
+          <Route path="/profile/me" element={<ProfileForm />} />
           <Route path="/dashboard" element={<HealthDashboardPage />} />
           <Route path="/doctors" element={<DoctorsPage />} />
         </Routes>

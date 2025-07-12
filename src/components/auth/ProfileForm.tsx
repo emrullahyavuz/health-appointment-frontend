@@ -6,8 +6,6 @@ import { Input } from "../ui/Input"
 import { Label } from "../ui/Label"
 import { Textarea } from "../ui/TextArea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/Select"
-// import { useAuth } from "@/lib/auth"
-// import { api } from "@/lib/api"
 import {
   User,
   Mail,
@@ -23,6 +21,7 @@ import {
   AlertCircle,
   Camera,
 } from "lucide-react"
+import { userAPI } from "../../lib/api"
 
 interface ProfileData {
   name: string
@@ -87,38 +86,35 @@ export function ProfileForm() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
+  const [user, setUser] = useState<{ avatar?: string; role?: string } | null>(null)
 
-//   const { user, token } = useAuth()
-const user = {
-    avatar: "https://via.placeholder.com/150",
-    role: "doctor"
-}
-const token = "1234567890"
+  // Fetch user profile data on mount
+    const fetchProfile = async () => {
+      try {
+        setLoading(true)
+        const response = await userAPI.getUserProfile()
+        console.log("response", response)
+
+        if (response) {
+          setProfileData(response)
+          setSelectedLanguages(response.languages || [])
+        }
+      } catch (err) {
+        setError("Failed to load profile data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+  
 
   useEffect(() => {
-    if (user) {
+    
       fetchProfile()
-    }
-  }, [user, token])
+    }, [])
 
-  const fetchProfile = async () => {
-    if (!token) return
 
-    try {
-      setLoading(true)
-      const response = await api.users.getProfile(token)
-
-      if (response.ok) {
-        const data = await response.json()
-        setProfileData(data.profile || data)
-        setSelectedLanguages(data.profile?.languages || data.languages || [])
-      }
-    } catch (err) {
-      setError("Failed to load profile data")
-    } finally {
-      setLoading(false)
-    }
-  }
+  
 
   const handleInputChange = (field: string, value: string | number) => {
     setProfileData((prev) => ({ ...prev, [field]: value }))
