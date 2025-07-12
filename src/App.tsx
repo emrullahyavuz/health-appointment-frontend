@@ -8,6 +8,7 @@ import { ProfileForm } from "./components/auth/ProfileForm";
 import { Toaster } from "sonner";
 import { AppointmentsPage } from "./pages/Appointments";
 import { MessagesPage } from "./pages/Messages";
+import { ReviewsPage } from "./pages/Reviews";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/doctors" element={<DoctorsPage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/reviews" element={<ReviewsPage />} />
         </Routes>
       </BrowserRouter>
     </>
