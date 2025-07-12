@@ -21,7 +21,7 @@ import { Switch } from "../components/ui/Switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/Select"
 import { Label } from "../components/ui/Label"
 import { Separator } from "../components/ui/Seperator"
-import { Sidebar } from "../components/header/Sidebar"
+import { Sidebar } from "../components/sidebar/Sidebar"
 // import { useAuth } from "../lib/auth"
 
 interface SettingsSection {

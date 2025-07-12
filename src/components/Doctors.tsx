@@ -19,7 +19,7 @@ import { Input } from "./ui/Input"
 import { DoctorCard } from "./DoctorCard"
 import { AppointmentDialog } from "./AppointmentDialog"
 import { doctorAPI } from "../lib/api"
-import { Sidebar } from "./header/Sidebar"
+import { Sidebar } from "./sidebar/Sidebar"
 
 interface Doctor {
   _id: string

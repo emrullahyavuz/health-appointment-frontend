@@ -17,7 +17,7 @@ import { Button } from "../components/ui/Button"
 import { Badge } from "../components/ui/Badge"
 import { Input } from "../components/ui/Input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/Select"
-import { Sidebar } from "../components/header/Sidebar"
+import { Sidebar } from "../components/sidebar/Sidebar"
 // import { useAuth } from "../lib/auth"
 // import { api } from "../lib/api"
 

@@ -1,25 +1,10 @@
-"use client"
-
 import { useState } from "react"
-import {
-  Calendar,
-  MessageSquare,
-  BarChart3,
-  Settings,
-  Search,
-  Bell,
-  TrendingUp,
-  TrendingDown,
-  Heart,
-  Droplets,
-  Activity,
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card"
-import { Button } from "./ui/Button"
-import { Badge } from "./ui/Badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/Select"
-import { Separator } from "./ui/Seperator"
-import { Sidebar } from "./header/Sidebar"
+import { TrendingUp, TrendingDown, Heart, Droplets, Activity } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card"
+import { Badge } from "../components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/Select"
+import { Separator } from "../components/ui/Seperator"
+import { Sidebar } from "./sidebar/Sidebar"
 
 export function HealthDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("Last Week")
@@ -70,7 +55,6 @@ export function HealthDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-50 health-dashboard">
-      {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
@@ -80,15 +64,7 @@ export function HealthDashboard() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">Health Overview</h1>
-              <p className="text-gray-500">July 04, 2025</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon">
-                <Search className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Bell className="w-5 h-5" />
-              </Button>
+              <p className="text-gray-500">August 12, 2021</p>
             </div>
           </div>
 

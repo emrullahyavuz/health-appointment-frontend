@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import {
   Search,
@@ -16,7 +14,7 @@ import {
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
 import { Badge } from "../components/ui/badge"
-import { Sidebar } from "../components/header/Sidebar"
+import { Sidebar } from "../components/sidebar/Sidebar"
 // import { useAuth } from "../lib/auth"
 
 interface Message {
