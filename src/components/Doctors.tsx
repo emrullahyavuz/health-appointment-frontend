@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react"
 import {
-  Calendar,
-  MessageSquare,
-  BarChart3,
-  Settings,
   Search,
   Bell,
   Filter,
@@ -21,6 +17,12 @@ import { AppointmentDialog } from "./AppointmentDialog"
 import { doctorAPI } from "../lib/api"
 import { Sidebar } from "./sidebar/Sidebar"
 
+interface User {
+  _id: string
+  name: string
+  email: string
+  role: string
+}
 interface Doctor {
   _id: string
   user: {
@@ -74,6 +76,7 @@ export function Doctors() {
     averageRating: 0,
     availableToday: 0,
   })
+  const [user, setUser] = useState<User | null>(null)
 
 
   useEffect(() => {
@@ -93,9 +96,10 @@ export function Doctors() {
       setStats({
         totalDoctors: response.pagination.totalDoctors,
         patientsServed: 0,
-        averageRating: 0,
+        averageRating: response.pagination.avarageRating,
         availableToday: 0,
       })
+      setUser(response.doctors[0].user)
     } catch (error) {
       console.error("Error fetching doctors:", error)
     } finally {
@@ -204,7 +208,7 @@ export function Doctors() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Average Rating</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.averageRating.toFixed(1)}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.averageRating.toFixed(2)}</p>
               </div>
             </div>
           </Card>

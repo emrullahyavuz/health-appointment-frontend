@@ -1,66 +1,29 @@
-
 import { useLocation, useNavigate } from "react-router-dom"
-import { Calendar, MessageSquare, BarChart3, Settings, Stethoscope, Star, User, LogOut } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { Button } from "../ui/Button"
-// import { useAuth } from "../../lib/auth"
+import { authAPI } from "../../lib/api"
+import { toast } from "sonner"
+import { sidebarItems } from "./sidebarItems"
 
-const sidebarItems = [
-  {
-    icon: BarChart3,
-    label: "Dashboard",
-    href: "/dashboard",
-    roles: ["patient", "doctor", "admin"],
-  },
-  {
-    icon: Calendar,
-    label: "Appointments",
-    href: "/appointments",
-    roles: ["patient", "doctor", "admin"],
-  },
-  {
-    icon: MessageSquare,
-    label: "Messages",
-    href: "/messages",
-    roles: ["patient", "doctor", "admin"],
-  },
-  {
-    icon: Stethoscope,
-    label: "Doctors",
-    href: "/doctors",
-    roles: ["patient", "admin"],
-  },
-  {
-    icon: Star,
-    label: "Reviews",
-    href: "/reviews",
-    roles: ["patient", "doctor", "admin"],
-  },
-  {
-    icon: User,
-    label: "Profile",
-    href: "/profile",
-    roles: ["patient", "doctor", "admin"],
-  },
-  {
-    icon: Settings,
-    label: "Settings",
-    href: "/settings",
-    roles: ["patient", "doctor", "admin"],
-  },
-]
+
+
 
 export function Sidebar() {
-  const router = useNavigate()
-  const pathname = useLocation()
-  // const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const handleNavigation = (href: string) => {
-    router(href)
+    navigate(href)
   }
 
-  const handleLogout = () => {
-    
-    router("/login")
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout()
+      toast.success("Başarıyla çıkış yapıldı")
+      navigate("/auth/login")
+    } catch (error: any) {
+      toast.error(error.response.data.message)
+    }
   }
   const user = {
     role: "patient",
@@ -78,7 +41,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex flex-col space-y-6 flex-1">
         {filteredItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = location.pathname === item.href
           return (
             <Button
               key={item.href}

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { TrendingUp, TrendingDown, Heart, Droplets, Activity } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card"
-import { Badge } from "../components/ui/badge"
+import { Badge } from "../components/ui/Badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/Select"
 import { Separator } from "../components/ui/Seperator"
 import { Sidebar } from "./sidebar/Sidebar"
