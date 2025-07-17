@@ -11,6 +11,7 @@ import { MessagesPage } from "./pages/Messages";
 import { ReviewsPage } from "./pages/Reviews";
 import { SettingsPage } from "./pages/Settings";
 import { PatientProfilePage } from "./pages/profile/PatientProfile";
+import { DoctorProfilePage } from "./pages/profile/DoctorProfile";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile/patient" element={<PatientProfilePage />} />
+          <Route path="/profile/doctor" element={<DoctorProfilePage />} />
         </Routes>
       </BrowserRouter>
     </>
