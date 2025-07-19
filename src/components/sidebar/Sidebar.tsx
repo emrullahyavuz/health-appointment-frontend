@@ -6,20 +6,31 @@ import { sidebarItems } from "./sidebarItems"
 import { logoutUser } from "../../redux/auth/authSlice"
 import type { AppDispatch, RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
- 
+import { ConfirmationModal } from "../modals/ConfirmationModal";
+import { openModal } from "../../redux/modal/modalSlice";
 
 export function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch<AppDispatch>()
   const {user: userData} = useSelector((state: RootState) => state.auth)
-  console.log(userData)
+  const {isOpen: isOpenModal} = useSelector((state: RootState) => state.modal)
+  
 
   const handleNavigation = (href: string) => {
     navigate(href)
   }
 
   const handleLogout = async () => {
+    try {
+      dispatch(openModal({modalType: "confirmation"}))
+     
+    } catch (error: any) {
+      toast.error(error.response.data.message)
+    }
+  }
+
+  const handleConfirmLogout = async () => {
     try {
       await dispatch(logoutUser())
       toast.success("Başarıyla çıkış yapıldı")
@@ -28,6 +39,7 @@ export function Sidebar() {
       toast.error(error.response.data.message)
     }
   }
+
   const user = {
     role: userData?.role
   }
@@ -72,6 +84,15 @@ export function Sidebar() {
       >
         <LogOut className="w-6 h-6" />
       </Button>
+
+      {isOpenModal && <ConfirmationModal data={{
+        title: "Çıkış Yap",
+        message: "Çıkış yapmak istediğinize emin misiniz?",
+        type: "warning",
+        confirmText: "Çıkış Yap",
+        cancelText: "İptal",
+        onConfirm: handleConfirmLogout,
+      }} />}
     </div>
   )
 }

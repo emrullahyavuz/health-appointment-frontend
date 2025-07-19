@@ -2,7 +2,7 @@ import { AlertTriangle, CheckCircle, XCircle, Info } from "lucide-react"
 import { BaseModal } from "./BaseModal"
 import { Button } from "../ui/Button"
 import { useDispatch } from "react-redux"
-import { closeModal } from "../../redux/modal/ModalSlice"
+import { closeModal } from "../../redux/modal/modalSlice"
 import type { AppDispatch } from "../../redux/store"
 
 interface ConfirmationModalProps {
@@ -19,6 +19,7 @@ interface ConfirmationModalProps {
 
 export function ConfirmationModal({ data }: ConfirmationModalProps) {
   const dispatch = useDispatch<AppDispatch>()
+  
 
   const {
     title = "Confirm Action",
@@ -29,6 +30,7 @@ export function ConfirmationModal({ data }: ConfirmationModalProps) {
     onConfirm,
     onCancel,
   } = data || {}
+
 
   const handleConfirm = () => {
     onConfirm?.()
