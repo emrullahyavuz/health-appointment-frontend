@@ -4,14 +4,13 @@ import { HealthDashboardPage } from "./pages/HealthDashboardPage";
 import { LoginForm } from "./components/auth/LoginForm";
 import { RegisterForm } from "./components/auth/RegisterForm";
 import { PasswordUpdateForm } from "./components/auth/PasswordUpdateForm";
-import { ProfileForm } from "./components/auth/ProfileForm";
+import RoleBasedProfile from "./components/auth/RoleBasedProfile";
 import { Toaster } from "sonner";
 import { AppointmentsPage } from "./pages/Appointments";
 import { MessagesPage } from "./pages/Messages";
 import { ReviewsPage } from "./pages/Reviews";
 import { SettingsPage } from "./pages/Settings";
-import { PatientProfilePage } from "./pages/profile/PatientProfile";
-import { DoctorProfilePage } from "./pages/profile/DoctorProfile";
+
 
 function App() {
   return (
@@ -26,16 +25,13 @@ function App() {
             path="/auth/password-update"
             element={<PasswordUpdateForm />}
           />
-          <Route path="/profile/me" element={<ProfileForm />} />
+          <Route path="/profile/me" element={<RoleBasedProfile />} />
           <Route path="/dashboard" element={<HealthDashboardPage />} />
           <Route path="/doctors" element={<DoctorsPage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/profile/patient" element={<PatientProfilePage />} />
-          <Route path="/profile/doctor" element={<DoctorProfilePage />} />
-          
         </Routes>
       </BrowserRouter>
     </>
