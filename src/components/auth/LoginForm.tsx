@@ -31,13 +31,10 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const response = await dispatch(loginUser(data));
-      if (response.meta.requestStatus === "fulfilled") {
-        toast.success("Giriş başarılı");
+      await dispatch(loginUser(data));
+      setTimeout(() => {
         navigate("/dashboard");
-      }
-
-      // Redirect based on user role
+      }, 1000);
     } catch (err: unknown) {
       toast.error(err as string);
     }
