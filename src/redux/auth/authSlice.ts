@@ -27,7 +27,6 @@ export const registerUser = createAsyncThunk<RegisterResponse, RegisterPayload, 
   }
 );
 
-
 // Login User
 export const loginUser = createAsyncThunk<LoginResponse, LoginPayload, { rejectValue: string }>(
   'auth/loginUser',
@@ -58,6 +57,19 @@ export const passwordUpdate = createAsyncThunk<PasswordUpdateResponse, PasswordU
       return response.data;
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || 'Password update failed';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Logout User
+export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
+  'auth/logoutUser',
+  async (_, thunkAPI) => {
+    try {
+      await authAPI.logout();
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Logout failed';
       return thunkAPI.rejectWithValue(message);
     }
   }

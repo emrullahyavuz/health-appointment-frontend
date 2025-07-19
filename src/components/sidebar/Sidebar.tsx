@@ -1,16 +1,18 @@
 import { useLocation, useNavigate } from "react-router-dom"
 import { LogOut } from "lucide-react"
 import { Button } from "../ui/Button"
-import { authAPI } from "../../lib/api"
 import { toast } from "sonner"
 import { sidebarItems } from "./sidebarItems"
-
-
+import { logoutUser } from "../../redux/auth/authSlice"
+import type { AppDispatch } from "../../redux/store";
+import { useDispatch } from "react-redux";
 
 
 export function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
+  const dispatch = useDispatch<AppDispatch>()
+
 
   const handleNavigation = (href: string) => {
     navigate(href)
@@ -18,7 +20,7 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await authAPI.logout()
+      await dispatch(logoutUser())
       toast.success("Başarıyla çıkış yapıldı")
       navigate("/auth/login")
     } catch (error: any) {
