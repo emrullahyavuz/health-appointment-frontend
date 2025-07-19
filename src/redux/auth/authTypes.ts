@@ -22,7 +22,8 @@ export interface LoginPayload {
 
 export interface LoginResponse {
   user: User;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface RegisterPayload {

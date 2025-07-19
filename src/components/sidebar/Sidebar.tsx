@@ -4,15 +4,16 @@ import { Button } from "../ui/Button"
 import { toast } from "sonner"
 import { sidebarItems } from "./sidebarItems"
 import { logoutUser } from "../../redux/auth/authSlice"
-import type { AppDispatch } from "../../redux/store";
-import { useDispatch } from "react-redux";
-
+import type { AppDispatch, RootState } from "../../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+ 
 
 export function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch<AppDispatch>()
-
+  const {user: userData} = useSelector((state: RootState) => state.auth)
+  console.log(userData)
 
   const handleNavigation = (href: string) => {
     navigate(href)
@@ -28,7 +29,7 @@ export function Sidebar() {
     }
   }
   const user = {
-    role: "patient",
+    role: userData?.role
   }
 
   const filteredItems = sidebarItems.filter((item) => (user?.role ? item.roles.includes(user.role) : true))
