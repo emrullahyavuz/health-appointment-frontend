@@ -12,8 +12,6 @@ import { ReviewsPage } from "./pages/Reviews";
 import { SettingsPage } from "./pages/Settings";
 import { PatientProfilePage } from "./pages/profile/PatientProfile";
 import { DoctorProfilePage } from "./pages/profile/DoctorProfile";
-import { BaseModal } from "./components/modals/BaseModal";
-import { AppointmentBookingModal } from "./components/modals/AppointmentBookingModal";
 
 function App() {
   return (
@@ -37,7 +35,7 @@ function App() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile/patient" element={<PatientProfilePage />} />
           <Route path="/profile/doctor" element={<DoctorProfilePage />} />
-          <Route path="/modals" element={<AppointmentBookingModal />} />
+          
         </Routes>
       </BrowserRouter>
     </>

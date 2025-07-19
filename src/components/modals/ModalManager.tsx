@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux"
-import { AppointmentBookingModal } from "./appointment-booking-modal"
-// import { DoctorDetailsModal } from "./doctor-details-modal"
+import { AppointmentBookingModal } from "./AppointmentBookingModal"
+import { DoctorDetailsModal } from "./DoctorDetailsModal"
 // import { ReviewModal } from "./review-modal"
 // import { ProfileEditModal } from "./profile-edit-modal"
 // import { ConfirmationModal } from "./confirmation-modal"
@@ -10,7 +10,7 @@ import { AppointmentBookingModal } from "./appointment-booking-modal"
 
 const MODAL_COMPONENTS = {
   APPOINTMENT_BOOKING: AppointmentBookingModal,
-//   DOCTOR_DETAILS: DoctorDetailsModal,
+  DOCTOR_DETAILS: DoctorDetailsModal,
 //   REVIEW: ReviewModal,
 //   PROFILE_EDIT: ProfileEditModal,
 //   CONFIRMATION: ConfirmationModal,
