@@ -622,7 +622,7 @@ export function SettingsPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+
 
       {/* Main Content */}
       <div className="flex-1 flex">

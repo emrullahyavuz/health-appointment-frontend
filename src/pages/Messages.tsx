@@ -13,7 +13,7 @@ import {
 } from "lucide-react"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
-import { Badge } from "../components/ui/badge"
+import { Badge } from "../components/ui/Badge"
 import { Sidebar } from "../components/sidebar/Sidebar"
 // import { useAuth } from "../lib/auth"
 
@@ -141,7 +141,7 @@ export function MessagesPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+      
 
       {/* Main Content */}
       <div className="flex-1 flex">
