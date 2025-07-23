@@ -12,7 +12,6 @@ import {
   Plus,
   Trash2,
   Clock,
-  AlertCircle,
 } from "lucide-react";
 import {
   Card,
@@ -35,7 +34,7 @@ import {
 } from "../../components/ui/Select";
 // import { useAuth } from "../../lib/Auth"
 import { userAPI } from "../../lib/api";
-import { Sidebar } from "../../components/sidebar/Sidebar";
+
 
 interface PatientProfile {
   _id: string;
@@ -56,6 +55,7 @@ interface PatientProfile {
     policyNumber: string;
     groupNumber: string;
   };
+  age?: number;
 }
 
 interface Appointment {
@@ -87,7 +87,6 @@ export function PatientProfilePage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [healthMetrics, setHealthMetrics] = useState<HealthMetric[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "overview" | "appointments" | "health" | "settings"
@@ -103,7 +102,6 @@ export function PatientProfilePage() {
 
   const fetchPatientData = async () => {
     try {
-      setLoading(true);
 
       // Fetch profile
       const profileResponse = await userAPI.getUserProfile();
@@ -153,17 +151,17 @@ export function PatientProfilePage() {
       ]);
     } catch (error) {
       console.error("Error fetching patient data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
-    const handleSaveProfile = async () => {
-      if (!profile || !token) return
 
+
+  const handleSaveProfile = async () => {
+      if (!profile) return
+      
       try {
         setSaving(true)
-        const response = await userAPI.updateProfile(profile)
+        const response = await userAPI.updateUserProfile(profile)
 
         if (response.ok) {
           setIsEditing(false)
@@ -174,7 +172,7 @@ export function PatientProfilePage() {
       } finally {
         setSaving(false)
       }
-    }
+  }
 
   const addAllergy = () => {
     if (profile) {
@@ -323,7 +321,7 @@ export function PatientProfilePage() {
                 ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as "overview" | "appointments" | "health" | "settings")}
                     className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
                       activeTab === tab.id
                         ? "border-orange-500 text-orange-600"
@@ -358,7 +356,7 @@ export function PatientProfilePage() {
                           id="name"
                           value={profile?.name}
                           onChange={(e) =>
-                            setProfile({ ...profile, name: e.target.value })
+                            setProfile(profile ? { ...profile, name: e.target.value } : null)
                           }
                           disabled={!isEditing}
                         />
@@ -371,7 +369,7 @@ export function PatientProfilePage() {
                           type="email"
                           value={profile?.email}
                           onChange={(e) =>
-                            setProfile({ ...profile, email: e.target.value })
+                            setProfile(profile ? { ...profile, email: e.target.value } : null)
                           }
                           disabled={!isEditing}
                         />
@@ -383,7 +381,7 @@ export function PatientProfilePage() {
                           id="phone"
                           value={profile?.phone}
                           onChange={(e) =>
-                            setProfile({ ...profile, phone: e.target.value })
+                            setProfile(profile ? { ...profile, phone: e.target.value } : null)
                           }
                           disabled={!isEditing}
                         />
@@ -391,18 +389,23 @@ export function PatientProfilePage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                        <Input
-                          id="dateOfBirth"
-                          type="date"
-                          value={profile?.dateOfBirth || ""}
-                          onChange={(e) =>
-                            setProfile({
-                              ...profile,
-                              dateOfBirth: e.target.value,
-                            })
-                          }
-                          disabled={!isEditing}
-                        />
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            id="dateOfBirth"
+                            type="date"
+                            value={profile?.dateOfBirth || ""}
+                            onChange={(e) =>
+                              setProfile(profile ? { ...profile, dateOfBirth: e.target.value } : null)
+                            }
+                            disabled={!isEditing}
+                          />
+                          {/* Yaş gösterimi */}
+                          {profile?.dateOfBirth && (
+                            <span className="text-gray-500 text-sm">
+                              {profile?.age}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="space-y-2">
@@ -410,7 +413,7 @@ export function PatientProfilePage() {
                         <Select
                           value={profile?.gender || ""}
                           onValueChange={(value) =>
-                            setProfile({ ...profile, gender: value })
+                            setProfile(profile ? { ...profile, gender: value } : null)
                           }
                           disabled={!isEditing}
                         >
@@ -420,7 +423,6 @@ export function PatientProfilePage() {
                           <SelectContent>
                             <SelectItem value="male">Male</SelectItem>
                             <SelectItem value="female">Female</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -430,7 +432,7 @@ export function PatientProfilePage() {
                         <Select
                           value={profile?.bloodType || ""}
                           onValueChange={(value) =>
-                            setProfile({ ...profile, bloodType: value })
+                            setProfile(profile ? { ...profile, bloodType: value } : null)
                           }
                           disabled={!isEditing}
                         >
@@ -457,7 +459,7 @@ export function PatientProfilePage() {
                         id="address"
                         value={profile?.address || ""}
                         onChange={(e) =>
-                          setProfile({ ...profile, address: e.target.value })
+                          setProfile(profile ? { ...profile, address: e.target.value } : null)
                         }
                         disabled={!isEditing}
                         rows={3}
@@ -472,10 +474,7 @@ export function PatientProfilePage() {
                         id="emergencyContact"
                         value={profile?.emergencyContact || ""}
                         onChange={(e) =>
-                          setProfile({
-                            ...profile,
-                            emergencyContact: e.target.value,
-                          })
+                          setProfile(profile ? { ...profile, emergencyContact: e.target.value } : null)
                         }
                         disabled={!isEditing}
                         placeholder="Emergency contact phone number"
@@ -553,13 +552,14 @@ export function PatientProfilePage() {
                           placeholder="Insurance Provider"
                           value={profile?.insuranceInfo?.provider || ""}
                           onChange={(e) =>
-                            setProfile({
+                            setProfile(profile ? {
                               ...profile,
                               insuranceInfo: {
-                                ...profile?.insuranceInfo,
                                 provider: e.target.value,
+                                policyNumber: profile.insuranceInfo?.policyNumber || "",
+                                groupNumber: profile.insuranceInfo?.groupNumber || "",
                               },
-                            })
+                            } : null)
                           }
                           disabled={!isEditing}
                         />
@@ -567,13 +567,14 @@ export function PatientProfilePage() {
                           placeholder="Policy Number"
                           value={profile?.insuranceInfo?.policyNumber || ""}
                           onChange={(e) =>
-                            setProfile({
+                            setProfile(profile ? {
                               ...profile,
                               insuranceInfo: {
-                                ...profile?.insuranceInfo,
+                                provider: profile.insuranceInfo?.provider || "",
                                 policyNumber: e.target.value,
+                                groupNumber: profile.insuranceInfo?.groupNumber || "",
                               },
-                            })
+                            } : null)
                           }
                           disabled={!isEditing}
                         />
